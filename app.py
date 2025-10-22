@@ -1,7 +1,8 @@
 from pathlib import Path
 import os
 
-import streamlit as st, json, glob, networkx as nx, html
+import streamlit as st, json, glob, networkx as nx
+import streamlit.components.v1 as components
 from pyvis.network import Network
 
 cwd = Path.cwd()
@@ -9,7 +10,8 @@ out_dir = f"{cwd}/dist"
 os.makedirs(out_dir, exist_ok=True)
 event_files = glob.glob(f"{cwd}/openlineage_events/event-*.json")
 print("Found events:")
-[print(f"\t{event_file}") for event_file in event_files]
+for event_file in event_files:
+    print(f"\t{event_file}")
 events = [json.load(open(p)) for p in event_files]
 
 G = nx.DiGraph()
@@ -27,13 +29,4 @@ net.save_graph(f"{out_dir}/lineage.html")
 st.title("OpenLineage Graph (no DB)")
 
 graph_html = open(f"{out_dir}/lineage.html").read()
-class HtmlFragment:
-    def __init__(self, html: str) -> None:
-        self.html = html
-
-    def _repr_html_(self) -> str:
-        return self.html
-
-# st.markdown(graph_html, unsafe_allow_html=True)
-st.write(HtmlFragment(graph_html), unsafe_allow_html=True)
-
+components.html(graph_html, height=750)
